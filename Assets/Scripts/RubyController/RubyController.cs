@@ -13,10 +13,11 @@ public class RubyController : MonoBehaviour
     public GameObject projectilePrefab, frog;
     public Image imagen, healtImagen;
 
-    public AudioClip throwSound;
+    public AudioClip throwSound, fireball;
     public AudioClip hitSound;
     AudioSource audioSource;
 
+    private bool fire;
     public bool second;
     public float health { get { return currentHealth; } }
     float currentHealth;
@@ -30,16 +31,36 @@ public class RubyController : MonoBehaviour
     private int robotCount;
     public TMP_Text robots, loser, win, projectile;
 
-    private int Projectilenum =4;
+    private int Projectilenum = 4;
     private bool startGame = true;
     public bool frogbool = true;
 
     public AudioControllerManager audioController;
 
+    public bool secondScene;
+    public Sprite cog, fireSprite;
+    public ChangePowers changePowers;
 
+    private bool runfast;
     // Start is called before the first frame update
     void Start()
     {
+        if (secondScene)
+        {
+            if (PlayerPrefs.GetString("fire") == "true")
+            {
+                fire = true;
+                changePowers.ChangeFireball();
+            }
+        }
+        if (!fire)
+        {
+            projectilePrefab.GetComponent<SpriteRenderer>().sprite = cog;
+        }
+        else
+        {
+            projectilePrefab.GetComponent<SpriteRenderer>().sprite = fireSprite;
+        }
         audioSource = GetComponent<AudioSource>();
 
         rigidbody2d = GetComponent<Rigidbody2D>();
@@ -88,6 +109,19 @@ public class RubyController : MonoBehaviour
                 }
             }
 
+
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                if (runfast)
+                    speed = 10;
+
+            }
+            if (Input.GetKeyUp(KeyCode.Space))
+            {
+                speed = 5;
+            }
+
+
             if (Input.GetKeyDown(KeyCode.X))
             {
                 RaycastHit2D hit = Physics2D.Raycast(rigidbody2d.position + Vector2.up * 0.2f, lookDirection, 1.5f, LayerMask.GetMask("NPC"));
@@ -97,6 +131,20 @@ public class RubyController : MonoBehaviour
                     if (character != null)
                     {
                         character.DisplayDialog();
+                    }
+                    else
+                    {
+                        if (!fire)
+                        {
+                            hit.transform.GetComponent<ChangePowers>().ChangeFireball();
+                            fire = true;
+                            PlayerPrefs.SetString("fire","true");
+                        }
+                        else
+                        {
+                            hit.transform.GetComponent<ChangePowers>().RunVelocity();
+                            runfast = true;
+                        }
                     }
                 }
             }
@@ -148,11 +196,18 @@ public class RubyController : MonoBehaviour
     }
     void Launch()
     {
-        GameObject projectileObject = Instantiate(projectilePrefab, rigidbody2d.position + Vector2.up * 0.5f, Quaternion.identity);
+        GameObject projectileObject = Instantiate(projectilePrefab, rigidbody2d.position + Vector2.up * 0.5f, transform.localRotation, transform);
         Projectile projectile = projectileObject.GetComponent<Projectile>();
         projectile.Launch(lookDirection, 300);
         animator.SetTrigger("Launch");
-        PlaySound(throwSound);
+        if (fire)
+        {
+            PlaySound(fireball);
+        }
+        else
+        {
+            PlaySound(throwSound);
+        }
 
     }
 

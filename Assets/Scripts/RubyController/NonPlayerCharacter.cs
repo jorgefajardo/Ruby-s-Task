@@ -33,6 +33,7 @@ public class NonPlayerCharacter : MonoBehaviour
 
     public void DisplayDialog()
     {
+        transform.GetComponent<AudioSource>().Play();
         timerDisplay = displayTime;
         dialogBox.SetActive(true);
         Invoke("Launcher",2);

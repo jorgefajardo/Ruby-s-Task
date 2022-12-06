@@ -10,8 +10,10 @@ public class SaveProjectile : MonoBehaviour
 
         if (controller != null)
         {
+            transform.GetComponent<AudioSource>().Play();
             controller.PorjectileSave();
-            Destroy(transform.gameObject);
+            Destroy(transform.gameObject,1);
+            
         }
     }
 
